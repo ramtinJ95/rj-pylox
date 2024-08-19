@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "rj-pylox"
+version = "0.0.1"
+description = "Project for learning how to create a programing language"
+authors = ["ramtinJ95 <ramme95@gmail.com>"]
+maintainers = ["Ramtin"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "3.11.*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
