@@ -2,16 +2,47 @@ import sys
 
 
 class Lox:
-    def __main__(self):
-        if len(sys.argv) > 2:
-            print("Usage: rjpylox [script name]")
-        elif len(sys.argv) == 2:
-            self.run_file(sys.argv[1])
-        else:
-            self.run_prompt()
+    def __init__(self):
+        self.had_error = False
 
-    def run_file(self, filename: str) -> None:
+    def run_file(self, path: str) -> None:
+        file = open(path)
+        self.run(file.read())
+        if self.had_error:
+            sys.exit(65)
         print("file")
 
     def run_prompt(self):
+        while True:
+            line = input("rj-plox> ")
+            if line is None:
+                break
+            self.run(line)
+            self.had_error = False
         print("prompt")
+
+    def run(self, source: str):
+        scanner = Scanner()
+        tokens = scanner.scan_tokens()
+
+        for token in tokens:
+            print(token)
+
+        print("run")
+
+    def error(self, line: int, message: str):
+        self.report(line, "", message)
+
+    def report(self, line: int, where: str, message: str):
+        sys.stderr.write(f"[line {line}] Error {where}: {message}")
+
+
+if __name__ == "__main__":
+    lox = Lox()
+    if len(sys.argv) > 2:
+        print("Usage: rjpylox [script name]")
+        sys.exit(64)
+    elif len(sys.argv) == 2:
+        lox.run_file(sys.argv[1])
+    else:
+        lox.run_prompt()
