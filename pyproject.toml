@@ -14,7 +14,7 @@ mypy = "^1.11.1"
 
 [tool.ruff]
 indent-width = 4
-line-length = 120
+line-length = 100
 show-fixes = true
 
 [build-system]
