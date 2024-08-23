@@ -9,7 +9,8 @@ class Token:
         self.line = line
 
     def __str__(self):
-        return (
+        return
+        (
             f'Token<{self.type.name}{": " + str(self.lexeme) if self.lexeme else ""}, {self.line}>'
         )
 

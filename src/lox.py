@@ -1,5 +1,7 @@
 import sys
 
+from scanner import Scanner
+
 
 class Lox:
     def __init__(self):
@@ -12,7 +14,7 @@ class Lox:
             sys.exit(65)
         print("file")
 
-    def run_prompt(self):
+    def run_prompt(self) -> None:
         while True:
             line = input("rj-plox> ")
             if line is None:
@@ -21,8 +23,8 @@ class Lox:
             self.had_error = False
         print("prompt")
 
-    def run(self, source: str):
-        scanner = Scanner()
+    def run(self, source: str) -> None:
+        scanner = Scanner(source)
         tokens = scanner.scan_tokens()
 
         for token in tokens:
@@ -30,10 +32,10 @@ class Lox:
 
         print("run")
 
-    def error(self, line: int, message: str):
+    def error(self, line: int, message: str) -> None:
         self.report(line, "", message)
 
-    def report(self, line: int, where: str, message: str):
+    def report(self, line: int, where: str, message: str) -> None:
         sys.stderr.write(f"[line {line}] Error {where}: {message}")
 
 
