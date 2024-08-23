@@ -32,9 +32,11 @@ class Lox:
 
         print("run")
 
+    @staticmethod
     def error(self, line: int, message: str) -> None:
         self.report(line, "", message)
 
+    @staticmethod
     def report(self, line: int, where: str, message: str) -> None:
         sys.stderr.write(f"[line {line}] Error {where}: {message}")
 
