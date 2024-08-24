@@ -17,7 +17,7 @@ class Lox:
     def run_prompt(self) -> None:
         while True:
             line = input("rj-plox> ")
-            if line is None:
+            if line is None or line == "exit()":
                 break
             self.run(line)
             self.had_error = False
