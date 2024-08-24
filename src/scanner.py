@@ -2,6 +2,7 @@ from token import Token
 from typing import Dict
 
 from token_type import TokenType
+from error_handler import ErrorHandler
 
 
 class Scanner:
@@ -52,6 +53,7 @@ class Scanner:
         elif char == ".":
             self.add_token(TokenType.DOT)
         elif char == "-":
+            print(char)
             self.add_token(TokenType.MINUS)
         elif char == "+":
             self.add_token(TokenType.PLUS)
@@ -73,7 +75,7 @@ class Scanner:
                 "=") else self.add_token(TokenType.GREATER)
         elif char == "/":
             if self.match("/"):
-                while self.peek() != "\n" and not self.is_at_end:
+                while self.peek() != "\n" and not self.is_at_end():
                     self.advance()
             else:
                 self.add_token(TokenType.SLASH)
@@ -93,9 +95,8 @@ class Scanner:
                 self._number()
             elif char.isalpha():
                 self.identifier()
-
             else:
-                print(f"{self.line}, Unexpected character")
+                ErrorHandler.error(self.line, "Unexpected character.")
 
     def _string(self) -> None:
         while self.peek() != '"' and not self.is_at_end():
@@ -104,7 +105,7 @@ class Scanner:
             self.advance()
 
         if self.is_at_end():
-            print(f"{self.line}, Unterminated string")
+            ErrorHandler.error(self.line, "Unterminated string.")
             return
 
         self.advance()
@@ -136,7 +137,7 @@ class Scanner:
         self.tokens.append(Token(type, text, literal, self.line))
 
     def match(self, expected: str) -> bool:
-        if self.is_at_end:
+        if self.is_at_end():
             return False
         if self.source[self.current] != expected:
             return False
