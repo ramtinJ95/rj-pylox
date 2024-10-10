@@ -1,5 +1,5 @@
 import sys
-
+from parser import Parser
 from scanner import Scanner
 from error_handler import ErrorHandler
 
@@ -23,9 +23,10 @@ class Lox:
     def run(self, source: str) -> None:
         scanner = Scanner(source)
         tokens = scanner.scan_tokens()
-
-        for token in tokens:
-            print(token)
+        parser = Parser()
+        expression = parser.parse()
+        if ErrorHandler.has_error:
+            return
 
 
 if __name__ == "__main__":

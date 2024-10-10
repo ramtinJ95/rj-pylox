@@ -1,5 +1,6 @@
 import expr
 from token import Token
+from error_handler import ErrorHandler, ParseError
 from token_type import TokenType
 
 
@@ -8,7 +9,13 @@ class Parser:
         self.current = 0
         self.tokens = tokens
 
-    def expressions(self) -> expr.Expr:
+    def parse(self) -> expr.Expr:
+        try:
+            return self.expression()
+        except ParseError:
+            return None
+
+    def expression(self) -> expr.Expr:
         return self.equality()
 
     def equality(self) -> expr.Expr:
@@ -66,9 +73,10 @@ class Parser:
             return expr.Literal(self.previous().literal)
 
         if self.match(TokenType.LEFT_PAREN):
-            expression = self.expressions()
+            expression = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return expr.Grouping(expression)
+        ErrorHandler.error(self.peek(), "Expect expression.")
 
     def match(self, *types: TokenType) -> bool:
         for type in types:
@@ -76,6 +84,11 @@ class Parser:
                 self.advance()
                 return True
         return False
+
+    def consume(self, type: TokenType, message: str) -> Token:
+        if self.check(type):
+            return self.advance()
+        ErrorHandler.error(self.peek(), message)
 
     def check(self, type: TokenType) -> bool:
         if self.is_at_end():
@@ -95,3 +108,28 @@ class Parser:
 
     def previous(self) -> Token:
         return self.tokens[self.current - 1]
+
+    def error(self, token: Token, message: str) -> ParseError:
+        ErrorHandler.error(token, message)
+        return ParseError()
+
+    def synchronize(self) -> None:
+        self.advance()
+
+        while not self.is_at_end():
+            if self.previous().type == TokenType.SEMICOLON:
+                return
+
+            if self.peek().type in (
+                TokenType.CLASS,
+                TokenType.FUN,
+                TokenType.VAR,
+                TokenType.FOR,
+                TokenType.IF,
+                TokenType.WHILE,
+                TokenType.PRINT,
+                TokenType.RETURN
+            ):
+                return
+
+            self.advance()
