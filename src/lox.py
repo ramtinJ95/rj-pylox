@@ -1,11 +1,11 @@
 import sys
 from parser import Parser
-from scanner import Scanner
+
 from error_handler import ErrorHandler
+from scanner import Scanner
 
 
 class Lox:
-
     def run_file(self, path: str) -> None:
         file = open(path)
         self.run(file.read())
@@ -23,8 +23,9 @@ class Lox:
     def run(self, source: str) -> None:
         scanner = Scanner(source)
         tokens = scanner.scan_tokens()
-        parser = Parser()
+        parser = Parser(tokens)
         expression = parser.parse()
+        print(expression)
         if ErrorHandler.has_error:
             return
 

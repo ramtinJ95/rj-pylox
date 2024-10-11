@@ -25,8 +25,9 @@ def main():
     )
 
 
-def define_ast(output_dir: str, base_name: str, types: list[str],
-               extra_imports: list[str] = None) -> None:
+def define_ast(
+    output_dir: str, base_name: str, types: list[str], extra_imports: list[str] = None
+) -> None:
     lower_base_name = base_name.lower()
     path = output_dir + "/" + lower_base_name + ".py"
     output_writer = open(path, "w", encoding="UTF-8")
@@ -41,8 +42,7 @@ def define_ast(output_dir: str, base_name: str, types: list[str],
         define_type(output_writer, base_name, class_name, fields)
 
 
-def define_type(
-        output_writer: TextIO, base_name: str, class_name: str, fields: str) -> None:
+def define_type(output_writer: TextIO, base_name: str, class_name: str, fields: str) -> None:
     output_writer.write("\n\n")
     output_writer.write(f"class {class_name}({base_name}):\n")
     # Follow 80 char limit
@@ -54,8 +54,7 @@ def define_type(
         output_writer.write("\n    ):\n")
     else:
         output_writer.write("    def __init__(\n        ")
-        output_writer.write(",\n        ".join(
-            ["self"] + fields.split(", ")))
+        output_writer.write(",\n        ".join(["self"] + fields.split(", ")))
         output_writer.write(",\n    ):\n")
 
     fields_list = fields.split(", ")
@@ -66,8 +65,7 @@ def define_type(
 
     output_writer.write(f"{SPACE_4}def accept(self, visitor: Visitor):\n")
     output_writer.write(
-        f"{SPACE_8}return visitor.visit_"
-        f"{class_name.lower()}_{base_name.lower()}(self)\n"
+        f"{SPACE_8}return visitor.visit_" f"{class_name.lower()}_{base_name.lower()}(self)\n"
     )
 
 
@@ -98,8 +96,7 @@ def define_imports(output_writer: TextIO, extra_imports: list[str] = None) -> No
 def define_base_class(output_writer: TextIO, base_name: str) -> None:
     output_writer.write(f"class {base_name}(ABC):\n")
     output_writer.write(f"{SPACE_4}@abstractmethod\n")
-    output_writer.write(
-        f"{SPACE_4}def accept(self, visitor: Visitor[V]) -> V:\n")
+    output_writer.write(f"{SPACE_4}def accept(self, visitor: Visitor[V]) -> V:\n")
     output_writer.write(f"{SPACE_8}...\n")
 
 

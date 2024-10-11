@@ -1,8 +1,8 @@
 from token import Token
 from typing import Dict
 
-from token_type import TokenType
 from error_handler import ErrorHandler
+from token_type import TokenType
 
 
 class Scanner:
@@ -62,17 +62,21 @@ class Scanner:
         elif char == "*":
             self.add_token(TokenType.STAR)
         elif char == "!":
-            self.add_token(TokenType.BANG_EQUAL) if self.match(
-                "=") else self.add_token(TokenType.BANG)
+            self.add_token(TokenType.BANG_EQUAL) if self.match("=") else self.add_token(
+                TokenType.BANG
+            )
         elif char == "=":
-            self.add_token(TokenType.EQUAL_EQUAL) if self.match(
-                "=") else self.add_token(TokenType.EQUAL)
+            self.add_token(TokenType.EQUAL_EQUAL) if self.match("=") else self.add_token(
+                TokenType.EQUAL
+            )
         elif char == "<":
-            self.add_token(TokenType.LESS_EQUAL) if self.match(
-                "=") else self.add_token(TokenType.LESS)
+            self.add_token(TokenType.LESS_EQUAL) if self.match("=") else self.add_token(
+                TokenType.LESS
+            )
         elif char == ">":
-            self.add_token(TokenType.GREATER_EQUAL) if self.match(
-                "=") else self.add_token(TokenType.GREATER)
+            self.add_token(TokenType.GREATER_EQUAL) if self.match("=") else self.add_token(
+                TokenType.GREATER
+            )
         elif char == "/":
             if self.match("/"):
                 while self.peek() != "\n" and not self.is_at_end():
@@ -110,7 +114,7 @@ class Scanner:
 
         self.advance()
 
-        value = self.source[self.start + 1: self.current - 1]
+        value = self.source[self.start + 1 : self.current - 1]
         self.add_token(TokenType.STRING, value)
 
     def _number(self) -> None:
@@ -122,8 +126,7 @@ class Scanner:
             while self.peek().isdigit():
                 self.advance()
 
-        self.add_token(TokenType.NUMBER, float(
-            self.source[self.start: self.current]))
+        self.add_token(TokenType.NUMBER, float(self.source[self.start : self.current]))
 
     def is_at_end(self) -> bool:
         return self.current >= len(self.source)
@@ -133,7 +136,7 @@ class Scanner:
         return self.source[self.current - 1]
 
     def add_token(self, type: TokenType, literal: object = None) -> None:
-        text = self.source[self.start:self.current]
+        text = self.source[self.start : self.current]
         self.tokens.append(Token(type, text, literal, self.line))
 
     def match(self, expected: str) -> bool:
@@ -158,7 +161,7 @@ class Scanner:
         while self.is_alpha_numeric(self.peek()):
             self.advance()
 
-        text = self.source[self.start: self.current]
+        text = self.source[self.start : self.current]
         _type = self.keywords.get(text)
         if _type is None:
             _type = TokenType.IDENTIFIER

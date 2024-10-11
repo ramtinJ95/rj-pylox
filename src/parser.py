@@ -1,5 +1,6 @@
-import expr
 from token import Token
+
+import expr
 from error_handler import ErrorHandler, ParseError
 from token_type import TokenType
 
@@ -31,7 +32,9 @@ class Parser:
     def comparison(self) -> expr.Expr:
         expression = self.term()
 
-        while self.match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL):
+        while self.match(
+            TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL
+        ):
             operator = self.previous()
             right = self.term()
             expression = expr.Binary(expression, operator, right)
@@ -64,11 +67,7 @@ class Parser:
 
     def primary(self) -> expr.Expr:
         if self.match(
-            TokenType.FALSE,
-            TokenType.TRUE,
-            TokenType.NIL,
-            TokenType.STRING,
-            TokenType.NUMBER
+            TokenType.FALSE, TokenType.TRUE, TokenType.NIL, TokenType.STRING, TokenType.NUMBER
         ):
             return expr.Literal(self.previous().literal)
 
@@ -128,7 +127,7 @@ class Parser:
                 TokenType.IF,
                 TokenType.WHILE,
                 TokenType.PRINT,
-                TokenType.RETURN
+                TokenType.RETURN,
             ):
                 return
 
