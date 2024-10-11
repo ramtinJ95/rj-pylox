@@ -25,3 +25,9 @@ class ErrorHandler:
 
 class ParseError(RuntimeError):
     pass
+
+
+class RuntimeErr(RuntimeError):
+    def __init__(self, *args: object, token: Token) -> None:
+        super().__init__(*args)
+        self.token = token
