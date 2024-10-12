@@ -1,12 +1,19 @@
 import expr
 from token_type import TokenType
-from error_handler import RuntimeErr
+from error_handler import ErrorHandler, RuntimeErr
 from token import Token
 
 
 class Interpreter(expr.Visitor):
     def __init__(self):
         pass
+
+    def interpret(self, expression: expr.Expr) -> None:
+        try:
+            value = self.evaluate(expression)
+            print(self.stringify(value))
+        except RuntimeErr as error:
+            ErrorHandler.runtime_error(error)
 
     def visit_literal_expression(self, expression: expr.Literal) -> object:
         return expression.value
@@ -19,10 +26,8 @@ class Interpreter(expr.Visitor):
 
         match expression.operator.type:
             case TokenType.MINUS:
-                if isinstance(right, float):
-                    return -(right)
-                else:
-                    print("oohh shit visit_unary_expression is fucked")
+                self.check_number_operand(expression.operator, right)
+                return -(right)
             case TokenType.BANG:
                 return not self.is_truthy(right)
         return None
@@ -35,23 +40,31 @@ class Interpreter(expr.Visitor):
         # isinstance checks later
         match expression.operator.type:
             case TokenType.MINUS:
+                self.check_number_operands(expression.operator, left, right)
                 return float(left) - float(right)
             case TokenType.PLUS:
                 if isinstance(left, float) and isinstance(right, float):
                     return float(left) + float(right)
                 if isinstance(left, str) and isinstance(right, str):
                     return str(left) + str(right)
+                raise RuntimeErr("Operands must be two numbers or two strings.", expression.operator)
             case TokenType.SLASH:
+                self.check_number_operands(expression.operator, left, right)
                 return float(left) / float(right)
             case TokenType.STAR:
+                self.check_number_operands(expression.operator, left, right)
                 return float(left) * float(right)
             case TokenType.GREATER:
+                self.check_number_operands(expression.operator, left, right)
                 return float(left) > float(right)
             case TokenType.GREATER_EQUAL:
+                self.check_number_operands(expression.operator, left, right)
                 return float(left) >= float(right)
             case TokenType.LESS:
+                self.check_number_operands(expression.operator, left, right)
                 return float(left) < float(right)
             case TokenType.LESS_EQUAL:
+                self.check_number_operands(expression.operator, left, right)
                 return float(left) <= float(right)
             case TokenType.BANG_EQUAL:
                 return left != right
@@ -66,11 +79,23 @@ class Interpreter(expr.Visitor):
     def is_truthy(self, obj: object) -> bool:
         if obj is None:
             return False
-        if isinstance(obj, bool):
-            return obj
+        if isinstance(obj, float):
+            return obj.__str__()
         return True
+
+    def stringify(self, obj: object) -> str:
+        if obj is None:
+            return "nil"
+        if isinstance(obj, float) and isinstance(obj, int):
+            return str(int(obj))
+        return str(obj)
 
     def check_number_operand(self, operator: Token, operand: object) -> None:
         if isinstance(operand, float):
             return
         raise RuntimeErr("Operand must be a number", token=operator)
+
+    def check_number_operands(self, operator: Token, left: object, right: object) -> None:
+        if isinstance(left, float) and isinstance(right, float):
+            return
+        raise RuntimeErr("Operands must be numbers.", token=operator)
