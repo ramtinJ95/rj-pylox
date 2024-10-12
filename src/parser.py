@@ -96,7 +96,7 @@ class Parser:
         return self.peek().type == type
 
     def advance(self) -> Token:
-        if self.is_at_end():
+        if not self.is_at_end():
             self.current += 1
         return self.previous()
 
