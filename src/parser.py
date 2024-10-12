@@ -44,6 +44,7 @@ class Parser:
         expression = self.factor()
 
         while self.match(TokenType.MINUS, TokenType.PLUS):
+            print("we in parse.term()")
             operator = self.previous()
             right = self.factor()
             expression = expr.Binary(expression, operator, right)

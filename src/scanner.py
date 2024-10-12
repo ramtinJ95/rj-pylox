@@ -53,7 +53,6 @@ class Scanner:
         elif char == ".":
             self.add_token(TokenType.DOT)
         elif char == "-":
-            print(char)
             self.add_token(TokenType.MINUS)
         elif char == "+":
             self.add_token(TokenType.PLUS)

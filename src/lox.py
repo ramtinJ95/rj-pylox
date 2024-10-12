@@ -29,9 +29,11 @@ class Lox:
     def run(self, source: str) -> None:
         scanner = Scanner(source)
         tokens = scanner.scan_tokens()
+        for t in tokens:
+            print(t)
         parser = Parser(tokens)
         expression = parser.parse()
-        print(expression)
+        print(f"this is what comes out the parser: {expression}")
         if ErrorHandler.has_error:
             sys.exit(65)
         if ErrorHandler.had_runtime_error:
