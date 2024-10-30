@@ -24,6 +24,14 @@ def main():
         ["from token import Token"],
     )
 
+    define_ast(output_dir, "Stmt",
+               [
+                   "Expression | expression: Expr",
+                   "Print | expression: Expr"
+               ],
+               ["from expr import Expr"]
+               )
+
 
 def define_ast(
     output_dir: str, base_name: str, types: list[str], extra_imports: list[str] = None
@@ -96,7 +104,8 @@ def define_imports(output_writer: TextIO, extra_imports: list[str] = None) -> No
 def define_base_class(output_writer: TextIO, base_name: str) -> None:
     output_writer.write(f"class {base_name}(ABC):\n")
     output_writer.write(f"{SPACE_4}@abstractmethod\n")
-    output_writer.write(f"{SPACE_4}def accept(self, visitor: Visitor[V]) -> V:\n")
+    output_writer.write(
+        f"{SPACE_4}def accept(self, visitor: Visitor[V]) -> V:\n")
     output_writer.write(f"{SPACE_8}...\n")
 
 
