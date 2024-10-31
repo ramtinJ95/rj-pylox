@@ -21,7 +21,7 @@ class Lox:
     def run_prompt(self) -> None:
         while True:
             line = input("rj-plox> ")
-            if line is None or line == "exit()":
+            if line is None or line == "exit":
                 break
             self.run(line)
             ErrorHandler.has_error = False
@@ -29,16 +29,16 @@ class Lox:
     def run(self, source: str) -> None:
         scanner = Scanner(source)
         tokens = scanner.scan_tokens()
-        for t in tokens:
-            print(t)
         parser = Parser(tokens)
-        expression = parser.parse()
-        print(f"this is what comes out the parser: {expression}")
+        # expression = parser.parse()
+        statements = parser.parse()
+        # print(f"this is what comes out the parser: {expression}")
         if ErrorHandler.has_error:
             sys.exit(65)
         if ErrorHandler.had_runtime_error:
             sys.exit(70)
-        self.interpreter.interpret(expression)
+        # self.interpreter.interpret(expression)
+        self.interpreter.interpret(statements)
 
 
 if __name__ == "__main__":

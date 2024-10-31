@@ -24,6 +24,7 @@ class Scanner:
             "nil": TokenType.NIL,
             "or": TokenType.OR,
             "return": TokenType.RETURN,
+            "print": TokenType.PRINT,
             "super": TokenType.SUPER,
             "true": TokenType.TRUE,
             "var": TokenType.VAR,
@@ -113,7 +114,7 @@ class Scanner:
 
         self.advance()
 
-        value = self.source[self.start + 1 : self.current - 1]
+        value = self.source[self.start + 1: self.current - 1]
         self.add_token(TokenType.STRING, value)
 
     def _number(self) -> None:
@@ -125,7 +126,8 @@ class Scanner:
             while self.peek().isdigit():
                 self.advance()
 
-        self.add_token(TokenType.NUMBER, float(self.source[self.start : self.current]))
+        self.add_token(TokenType.NUMBER, float(
+            self.source[self.start: self.current]))
 
     def is_at_end(self) -> bool:
         return self.current >= len(self.source)
@@ -135,7 +137,7 @@ class Scanner:
         return self.source[self.current - 1]
 
     def add_token(self, type: TokenType, literal: object = None) -> None:
-        text = self.source[self.start : self.current]
+        text = self.source[self.start: self.current]
         self.tokens.append(Token(type, text, literal, self.line))
 
     def match(self, expected: str) -> bool:
@@ -159,13 +161,13 @@ class Scanner:
     def identifier(self) -> None:
         while self.is_alpha_numeric(self.peek()):
             self.advance()
-
-        text = self.source[self.start : self.current]
-        _type = self.keywords.get(text)
+        text = self.source[self.start: self.current]
+        _type = self.keywords.get(text, TokenType.IDENTIFIER)
+        literal = {"true": True, "false": False, "nil": None}.get(text)
         if _type is None:
             _type = TokenType.IDENTIFIER
 
-        self.add_token(_type)
+        self.add_token(_type, literal)
 
     def is_alpha_numeric(self, char: str) -> bool:
         return char.isalpha() or char.isdigit()

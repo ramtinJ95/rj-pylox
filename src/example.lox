@@ -1,11 +1,6 @@
-// this is a comment
-(( )){} // grouping stuff
-!*+-/=<> <= == // operators
-while hi and hello
-var = "hello"
-"hell"
-!=
-==
->=
-<=
-// @
+print "one";
+print true;
+print false;
+print 2 + 1;
+print 1==1;
+print 1!=1;

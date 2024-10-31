@@ -1,23 +1,25 @@
 import expr
+import stmt
 from token_type import TokenType
 from error_handler import ErrorHandler, RuntimeErr
 from token import Token
 
+# TODO: change all these return and parameter types that are object to a
+# smaller subset like int | float etc
 
-class Interpreter(expr.Visitor):
+
+class Interpreter(expr.Visitor, stmt.Visitor):
     def __init__(self):
         pass
 
-    def interpret(self, expression: expr.Expr) -> None:
+    def interpret(self, statements: list[stmt.Stmt]) -> None:
         try:
-            value = self.evaluate(expression)
-            print(f"This is the value: {value}")
-            print(self.stringify(value))
+            for statement in statements:
+                self.execute(statement)
         except RuntimeErr as error:
             ErrorHandler.runtime_error(error)
 
     def visit_literal_expression(self, expression: expr.Literal) -> object:
-        print(f"We in visit_literal: {expression.__str__()}")
         return expression.value
 
     def visit_grouping_expression(self, expression: expr.Grouping) -> object:
@@ -37,14 +39,12 @@ class Interpreter(expr.Visitor):
     def visit_binary_expression(self, expression: expr.Binary) -> object:
         left = self.evaluate(expression.left)
         right = self.evaluate(expression.right)
-        print("kamel")
 
         # these case matchings have to be done better with
         # isinstance checks later
         match expression.operator.type:
             case TokenType.MINUS:
                 self.check_number_operands(expression.operator, left, right)
-                print("we in the TokenType.MINUS thingy")
                 return float(left) - float(right)
             case TokenType.PLUS:
                 if isinstance(left, float) and isinstance(right, float):
@@ -81,6 +81,20 @@ class Interpreter(expr.Visitor):
     def evaluate(self, expression: expr.Expr) -> object:
         return expression.accept(self)
 
+    def execute(self, statement: stmt.Stmt) -> None:
+        statement.accept(self)
+
+    # I dont think this is necessary in python, this evaluate step is probably
+    # a java only thing
+    def visit_expression_stmt(self, statement: stmt.Expression) -> None:
+        self.evaluate(statement.expression)
+        return None
+
+    def visit_print_stmt(self, statement: stmt.Print) -> None:
+        value = self.evaluate(statement.expression)
+        print(self.stringify(value))
+        return None
+
     def is_truthy(self, obj: object) -> bool:
         if obj is None:
             return False
@@ -102,6 +116,5 @@ class Interpreter(expr.Visitor):
 
     def check_number_operands(self, operator: Token, left: object, right: object) -> None:
         if isinstance(left, float) and isinstance(right, float):
-            print("we in check_number_operands")
             return
         raise RuntimeErr("Operands must be numbers.", token=operator)
