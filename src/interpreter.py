@@ -2,7 +2,8 @@ import expr
 import stmt
 from token_type import TokenType
 from error_handler import ErrorHandler, RuntimeErr
-from token import Token
+from tokens import Token
+from environment import Environment
 
 # TODO: change all these return and parameter types that are object to a
 # smaller subset like int | float etc
@@ -10,7 +11,7 @@ from token import Token
 
 class Interpreter(expr.Visitor, stmt.Visitor):
     def __init__(self):
-        pass
+        self.env = Environment()
 
     def interpret(self, statements: list[stmt.Stmt]) -> None:
         try:
@@ -35,6 +36,9 @@ class Interpreter(expr.Visitor, stmt.Visitor):
             case TokenType.BANG:
                 return not self.is_truthy(right)
         return None
+
+    def visit_variable_expression(self, expression: expr.Variable) -> object:
+        return self.env.get(expression.name)
 
     def visit_binary_expression(self, expression: expr.Binary) -> object:
         left = self.evaluate(expression.left)
@@ -93,6 +97,13 @@ class Interpreter(expr.Visitor, stmt.Visitor):
     def visit_print_stmt(self, statement: stmt.Print) -> None:
         value = self.evaluate(statement.expression)
         print(self.stringify(value))
+        return None
+
+    def visit_var_stmt(self, statement: stmt.Var) -> None:
+        value = None
+        if statement.initializer is not None:
+            value = self.evaluate(statement.initializer)
+        self.env.define(statement.name.lexeme, value)
         return None
 
     def is_truthy(self, obj: object) -> bool:

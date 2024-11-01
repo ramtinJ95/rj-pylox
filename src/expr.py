@@ -1,27 +1,37 @@
 from abc import ABC, abstractmethod
-from token import Token
 from typing import Generic, TypeVar
+
+from tokens import Token
 
 V = TypeVar("V")
 
 
 class Visitor(ABC, Generic[V]):
     @abstractmethod
-    def visit_binary_expression(self, expr: "Binary") -> V: ...
+    def visit_binary_expression(self, expr: "Binary") -> V:
+        ...
 
     @abstractmethod
-    def visit_grouping_expression(self, expr: "Grouping") -> V: ...
+    def visit_grouping_expression(self, expr: "Grouping") -> V:
+        ...
 
     @abstractmethod
-    def visit_literal_expression(self, expr: "Literal") -> V: ...
+    def visit_literal_expression(self, expr: "Literal") -> V:
+        ...
 
     @abstractmethod
-    def visit_unary_expression(self, expr: "Unary") -> V: ...
+    def visit_unary_expression(self, expr: "Unary") -> V:
+        ...
+
+    @abstractmethod
+    def visit_variable_expression(self, expr: "Variable") -> V:
+        ...
 
 
 class Expr(ABC):
     @abstractmethod
-    def accept(self, visitor: Visitor[V]) -> V: ...
+    def accept(self, visitor: Visitor[V]) -> V:
+        ...
 
 
 class Binary(Expr):
@@ -57,3 +67,11 @@ class Unary(Expr):
 
     def accept(self, visitor: Visitor):
         return visitor.visit_unary_expression(self)
+
+
+class Variable(Expr):
+    def __init__(self, name: Token):
+        self.name: Token = name
+
+    def accept(self, visitor: Visitor):
+        return visitor.visit_variable_expression(self)

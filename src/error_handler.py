@@ -1,5 +1,5 @@
 import sys
-from token import Token
+from tokens import Token
 
 from token_type import TokenType
 

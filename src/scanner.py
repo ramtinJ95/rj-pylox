@@ -1,4 +1,4 @@
-from token import Token
+from tokens import Token
 from typing import Dict
 
 from error_handler import ErrorHandler

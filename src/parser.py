@@ -1,4 +1,4 @@
-from token import Token
+from tokens import Token
 
 import expr
 import stmt
@@ -14,12 +14,21 @@ class Parser:
     def parse(self) -> list[stmt.Stmt]:
         statements: list[stmt.Stmt] = []
         while not self.is_at_end():
-            statements.append(self.statement())
+            statements.append(self.declaration())
 
         return statements
 
     def expression(self) -> expr.Expr:
         return self.equality()
+
+    def declaration(self) -> stmt.Stmt:
+        try:
+            if self.match(TokenType.VAR):
+                return self.var_declaration()
+            return self.statement()
+        except ParseError:
+            self.synchronize()
+            return None
 
     def statement(self) -> stmt.Stmt:
         if self.match(TokenType.PRINT):
@@ -30,6 +39,15 @@ class Parser:
         value = self.expression()
         self.consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return stmt.Print(value)
+
+    def var_declaration(self) -> stmt.Stmt:
+        name = self.consume(TokenType.IDENTIFIER, "Expect variable name.")
+        initializer: expr.Expr = None
+        if self.match(TokenType.EQUAL):
+            initializer = self.expression()
+
+        self.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        return stmt.Var(name, initializer)
 
     def expression_statement(self) -> stmt.Stmt:
         expression = self.expression()
@@ -87,6 +105,8 @@ class Parser:
             TokenType.FALSE, TokenType.TRUE, TokenType.NIL, TokenType.STRING, TokenType.NUMBER
         ):
             return expr.Literal(self.previous().literal)
+        if self.match(TokenType.IDENTIFIER):
+            return expr.Variable(self.previous())
 
         if self.match(TokenType.LEFT_PAREN):
             expression = self.expression()

@@ -20,23 +20,30 @@ def main():
             "Grouping | expression: Expr",
             "Literal | value",
             "Unary | operator: Token, right: Expr",
+            "Variable | name: Token"
         ],
         ["from token import Token"],
+        "expression"
     )
 
     define_ast(output_dir, "Stmt",
                [
                    "Expression | expression: Expr",
-                   "Print | expression: Expr"
+                   "Print | expression: Expr",
+                   "Var | name: Token, initializer: Expr | None"
                ],
-               ["from expr import Expr"]
+               ["from expr import Expr, Variable", "from tokens import Token"]
                )
 
 
 def define_ast(
-    output_dir: str, base_name: str, types: list[str], extra_imports: list[str] = None
+        output_dir: str, base_name: str, types: list[str], extra_imports: list[str] = None, custom_base_name: str = None
 ) -> None:
-    lower_base_name = base_name.lower()
+    lower_base_name = ""
+    if custom_base_name:
+        lower_base_name = custom_base_name.lower()
+    else:
+        lower_base_name = base_name.lower()
     path = output_dir + "/" + lower_base_name + ".py"
     output_writer = open(path, "w", encoding="UTF-8")
 

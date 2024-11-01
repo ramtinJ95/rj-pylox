@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-from expr import Expr
+from expr import Expr, Variable
+from tokens import Token
 
 V = TypeVar("V")
 
@@ -13,6 +14,10 @@ class Visitor(ABC, Generic[V]):
 
     @abstractmethod
     def visit_print_stmt(self, stmt: "Print") -> V:
+        ...
+
+    @abstractmethod
+    def visit_var_stmt(self, stmt: "Var") -> V:
         ...
 
 
@@ -36,3 +41,12 @@ class Print(Stmt):
 
     def accept(self, visitor: Visitor):
         return visitor.visit_print_stmt(self)
+
+
+class Var(Stmt):
+    def __init__(self, name: Token, initializer: Expr | None):
+        self.name: Token = name
+        self.initializer: Expr | None = initializer
+
+    def accept(self, visitor: Visitor):
+        return visitor.visit_var_stmt(self)
