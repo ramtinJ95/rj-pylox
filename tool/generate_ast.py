@@ -16,6 +16,7 @@ def main():
         output_dir,
         "Expr",
         [
+            "Assign | name: Token, value: Expr",
             "Binary | left: Expr, operator: Token, right: Expr",
             "Grouping | expression: Expr",
             "Literal | value",
@@ -48,16 +49,17 @@ def define_ast(
     output_writer = open(path, "w", encoding="UTF-8")
 
     define_imports(output_writer, extra_imports)
-    define_visitor(output_writer, base_name, types)
+    define_visitor(output_writer, base_name, lower_base_name, types)
     define_base_class(output_writer, base_name)
 
     for type in types:
         class_name = type.split("|", 1)[0].strip()
         fields = type.split("|", 1)[1].strip()
-        define_type(output_writer, base_name, class_name, fields)
+        define_type(output_writer, base_name,
+                    lower_base_name, class_name, fields)
 
 
-def define_type(output_writer: TextIO, base_name: str, class_name: str, fields: str) -> None:
+def define_type(output_writer: TextIO, base_name: str, lower_base_name: str, class_name: str, fields: str) -> None:
     output_writer.write("\n\n")
     output_writer.write(f"class {class_name}({base_name}):\n")
     # Follow 80 char limit
@@ -80,11 +82,11 @@ def define_type(output_writer: TextIO, base_name: str, class_name: str, fields: 
 
     output_writer.write(f"{SPACE_4}def accept(self, visitor: Visitor):\n")
     output_writer.write(
-        f"{SPACE_8}return visitor.visit_" f"{class_name.lower()}_{base_name.lower()}(self)\n"
+        f"{SPACE_8}return visitor.visit_" f"{class_name.lower()}_{lower_base_name}(self)\n"
     )
 
 
-def define_visitor(output_writer: TextIO, base_name: str, types: list[str]) -> None:
+def define_visitor(output_writer: TextIO, base_name: str, lower_base_name: str, types: list[str]) -> None:
     output_writer.write('V = TypeVar("V")\n\n\n')
     output_writer.write("class Visitor(ABC, Generic[V]):\n")
 
@@ -92,8 +94,8 @@ def define_visitor(output_writer: TextIO, base_name: str, types: list[str]) -> N
         type_name = type.split("|")[0].strip()
         output_writer.write(f"{SPACE_4}@abstractmethod\n")
         output_writer.write(
-            f"{SPACE_4}def visit_{type_name.lower()}_{base_name.lower()}"
-            f'(self, {base_name.lower()}: "{type_name}") -> V:\n'
+            f"{SPACE_4}def visit_{type_name.lower()}_{lower_base_name}"
+            f'(self, {lower_base_name}: "{type_name}") -> V:\n'
         )
         output_writer.write(f"{SPACE_8}...\n\n")
 

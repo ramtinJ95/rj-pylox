@@ -56,7 +56,7 @@ class Interpreter(expr.Visitor, stmt.Visitor):
                 if isinstance(left, str) and isinstance(right, str):
                     return str(left) + str(right)
                 raise RuntimeErr(
-                    "Operands must be two numbers or two strings.", expression.operator)
+                    "Operands must be two numbers or two strings.", token=expression.operator)
             case TokenType.SLASH:
                 self.check_number_operands(expression.operator, left, right)
                 return float(left) / float(right)
@@ -105,6 +105,11 @@ class Interpreter(expr.Visitor, stmt.Visitor):
             value = self.evaluate(statement.initializer)
         self.env.define(statement.name.lexeme, value)
         return None
+
+    def visit_assign_expression(self, expression: expr.Assign) -> object:
+        value = self.evaluate(expression.value)
+        self.env.assign(expression.name, value)
+        return value
 
     def is_truthy(self, obj: object) -> bool:
         if obj is None:

@@ -54,6 +54,16 @@ class Parser:
         self.consume(TokenType.SEMICOLON, "Expect ';' after expression")
         return stmt.Expression(expression)
 
+    def assignment(self) -> expr.Expr:
+        expression = self.equality()
+        if self.match(TokenType.EQUAL):
+            equals = self.previous()
+            value = self.assignment()
+            if isinstance(expression, expr.Variable):
+                return expr.Assign(expression.name, value)
+            ErrorHandler.error(equals, "Invalid assignment target.")
+        return expression
+
     def equality(self) -> expr.Expr:
         expression = self.comparison()
 
@@ -124,7 +134,7 @@ class Parser:
     def consume(self, type: TokenType, message: str) -> Token:
         if self.check(type):
             return self.advance()
-        ErrorHandler.error(self.peek(), message)
+        raise self.error(self.peek(), message)
 
     def check(self, type: TokenType) -> bool:
         if self.is_at_end():
@@ -165,6 +175,7 @@ class Parser:
                 TokenType.WHILE,
                 TokenType.PRINT,
                 TokenType.RETURN,
+                TokenType.EOF,
             ):
                 return
 
