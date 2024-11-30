@@ -28,6 +28,10 @@ class Visitor(ABC, Generic[V]):
     def visit_var_stmt(self, stmt: "Var") -> V:
         ...
 
+    @abstractmethod
+    def visit_while_stmt(self, stmt: "While") -> V:
+        ...
+
 
 class Stmt(ABC):
     @abstractmethod
@@ -78,3 +82,12 @@ class Var(Stmt):
 
     def accept(self, visitor: Visitor):
         return visitor.visit_var_stmt(self)
+
+
+class While(Stmt):
+    def __init__(self, condition: Expr, body: Stmt):
+        self.condition: Expr = condition
+        self.body: Stmt = body
+
+    def accept(self, visitor: Visitor):
+        return visitor.visit_while_stmt(self)

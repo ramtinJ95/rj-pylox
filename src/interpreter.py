@@ -139,6 +139,12 @@ class Interpreter(expr.Visitor, stmt.Visitor):
         self.env.define(statement.name.lexeme, value)
         return None
 
+    def visit_while_stmt(self, statement: stmt.While) -> None:
+        while self.is_truthy(self.evaluate(statement.condition)):
+            self.execute(statement.body)
+
+        return None
+
     def visit_assign_expression(self, expression: expr.Assign) -> object:
         value = self.evaluate(expression.value)
         self.env.assign(expression.name, value)
