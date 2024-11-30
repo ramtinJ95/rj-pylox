@@ -23,6 +23,18 @@ class Interpreter(expr.Visitor, stmt.Visitor):
     def visit_literal_expression(self, expression: expr.Literal) -> object:
         return expression.value
 
+    def visit_logical_expression(self, expression: expr.Logical) -> object:
+        left = self.evaluate(expression.left)
+
+        if expression.operator.type == TokenType.OR:
+            if self.is_truthy(left):
+                return left
+            return self.evaluate(expression.right)
+        if expression.operator.type == TokenType.AND:
+            if not self.is_truthy(left):
+                return left
+            return self.evaluate(expression.right)
+
     def visit_grouping_expression(self, expression: expr.Grouping) -> object:
         return self.evaluate(expression.expression)
 
@@ -106,6 +118,15 @@ class Interpreter(expr.Visitor, stmt.Visitor):
         self.evaluate(statement.expression)
         return None
 
+    def visit_if_stmt(self, statement: stmt.If) -> None:
+        if self.is_truthy(self.evaluate(statement.condition)):
+            self.execute(statement.then_branch)
+
+        elif statement.else_branch is not None:
+            self.execute(statement.else_branch)
+
+        return None
+
     def visit_print_stmt(self, statement: stmt.Print) -> None:
         value = self.evaluate(statement.expression)
         print(self.stringify(value))
@@ -124,11 +145,7 @@ class Interpreter(expr.Visitor, stmt.Visitor):
         return value
 
     def is_truthy(self, obj: object) -> bool:
-        if obj is None:
-            return False
-        if isinstance(obj, float):
-            return obj.__str__()
-        return True
+        return obj is not None and obj is not False
 
     def stringify(self, obj: object) -> str:
         if obj is None:

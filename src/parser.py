@@ -12,6 +12,9 @@ class Parser:
         self.tokens = tokens
 
     def parse(self) -> list[stmt.Stmt]:
+        if self.tokens[-2].type not in (TokenType.SEMICOLON, TokenType.RIGHT_BRACE):
+            expression = self.expression()
+            return [stmt.Print(expression)]
         statements: list[stmt.Stmt] = []
         while not self.is_at_end():
             statements.append(self.declaration())
@@ -19,7 +22,7 @@ class Parser:
         return statements
 
     def expression(self) -> expr.Expr:
-        return self.equality()
+        return self.assignment()
 
     def declaration(self) -> stmt.Stmt:
         try:
@@ -31,11 +34,29 @@ class Parser:
             return None
 
     def statement(self) -> stmt.Stmt:
+        if self.match(TokenType.IF):
+            return self.if_statement()
+
         if self.match(TokenType.PRINT):
             return self.print_statement()
+
         if self.match(TokenType.LEFT_BRACE):
             return stmt.Block(self.block())
+
         return self.expression_statement()
+
+    def if_statement(self) -> stmt.Stmt:
+        self.consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+
+        then_branch = self.statement()
+        else_branch = None
+
+        if self.match(TokenType.ELSE):
+            else_branch = self.statement()
+
+        return stmt.If(condition, then_branch, else_branch)
 
     def print_statement(self) -> stmt.Stmt:
         value = self.expression()
@@ -45,10 +66,12 @@ class Parser:
     def var_declaration(self) -> stmt.Stmt:
         name = self.consume(TokenType.IDENTIFIER, "Expect variable name.")
         initializer: expr.Expr = None
+
         if self.match(TokenType.EQUAL):
             initializer = self.expression()
 
-        self.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        self.consume(TokenType.SEMICOLON,
+                     "Expect ';' after variable declaration.")
         return stmt.Var(name, initializer)
 
     def expression_statement(self) -> stmt.Stmt:
@@ -65,15 +88,37 @@ class Parser:
         self.consume(TokenType.RIGHT_BRACE, "Expect '}' after block")
         return statements
 
-
     def assignment(self) -> expr.Expr:
-        expression = self.equality()
+        expression = self.logic_or()
+
         if self.match(TokenType.EQUAL):
             equals = self.previous()
             value = self.assignment()
+
             if isinstance(expression, expr.Variable):
                 return expr.Assign(expression.name, value)
             ErrorHandler.error(equals, "Invalid assignment target.")
+
+        return expression
+
+    def logic_or(self) -> expr.Expr:
+        expression = self.logic_and()
+
+        while self.match(TokenType.OR):
+            operator = self.previous()
+            right = self.logic_and()
+            expression = expr.Logical(expression, operator, right)
+
+        return expression
+
+    def logic_and(self) -> expr.Expr:
+        expression = self.equality()
+
+        while self.match(TokenType.AND):
+            operator = self.previous()
+            right = self.equality()
+            expression = expr.Logical(expression, operator, right)
+
         return expression
 
     def equality(self) -> expr.Expr:
@@ -95,6 +140,7 @@ class Parser:
             operator = self.previous()
             right = self.term()
             expression = expr.Binary(expression, operator, right)
+
         return expression
 
     def term(self) -> expr.Expr:
@@ -104,6 +150,7 @@ class Parser:
             operator = self.previous()
             right = self.factor()
             expression = expr.Binary(expression, operator, right)
+
         return expression
 
     def factor(self) -> expr.Expr:
@@ -113,6 +160,7 @@ class Parser:
             operator = self.previous()
             right = self.unary()
             expression = expr.Binary(expression, operator, right)
+
         return expression
 
     def unary(self) -> expr.Expr:
@@ -120,6 +168,7 @@ class Parser:
             operator = self.previous()
             right = self.unary()
             return expr.Unary(operator, right)
+
         return self.primary()
 
     def primary(self) -> expr.Expr:
@@ -134,18 +183,22 @@ class Parser:
             expression = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return expr.Grouping(expression)
+
         ErrorHandler.error(self.peek(), "Expect expression.")
 
     def match(self, *types: TokenType) -> bool:
         for type in types:
             if self.check(type):
+                print(f"Matched {type} at token {self.current}")
                 self.advance()
                 return True
+
         return False
 
     def consume(self, type: TokenType, message: str) -> Token:
         if self.check(type):
             return self.advance()
+
         raise self.error(self.peek(), message)
 
     def check(self, type: TokenType) -> bool:

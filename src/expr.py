@@ -24,6 +24,10 @@ class Visitor(ABC, Generic[V]):
         ...
 
     @abstractmethod
+    def visit_logical_expression(self, expression: "Logical") -> V:
+        ...
+
+    @abstractmethod
     def visit_unary_expression(self, expression: "Unary") -> V:
         ...
 
@@ -71,6 +75,16 @@ class Literal(Expr):
 
     def accept(self, visitor: Visitor):
         return visitor.visit_literal_expression(self)
+
+
+class Logical(Expr):
+    def __init__(self, left: Expr, operator: Token, right: Expr):
+        self.left: Expr = left
+        self.operator: Token = operator
+        self.right: Expr = right
+
+    def accept(self, visitor: Visitor):
+        return visitor.visit_logical_expression(self)
 
 
 class Unary(Expr):

@@ -17,6 +17,10 @@ class Visitor(ABC, Generic[V]):
         ...
 
     @abstractmethod
+    def visit_if_stmt(self, stmt: "If") -> V:
+        ...
+
+    @abstractmethod
     def visit_print_stmt(self, stmt: "Print") -> V:
         ...
 
@@ -45,6 +49,18 @@ class Expression(Stmt):
 
     def accept(self, visitor: Visitor):
         return visitor.visit_expression_stmt(self)
+
+
+class If(Stmt):
+    def __init__(
+        self, condition: Expr, then_branch: Stmt, else_branch: Stmt | None
+    ):
+        self.condition: Expr = condition
+        self.then_branch: Stmt = then_branch
+        self.else_branch: Stmt | None = else_branch
+
+    def accept(self, visitor: Visitor):
+        return visitor.visit_if_stmt(self)
 
 
 class Print(Stmt):
