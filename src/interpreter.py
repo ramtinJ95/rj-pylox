@@ -88,6 +88,18 @@ class Interpreter(expr.Visitor, stmt.Visitor):
     def execute(self, statement: stmt.Stmt) -> None:
         statement.accept(self)
 
+    def execute_block(self, statments: list[stmt.Stmt], environment: Environment) -> None:
+        previous = self.env
+        try:
+            self.env = environment
+            for statement in statments:
+                self.execute(statement)
+        finally:
+            self.env = previous
+
+    def visit_block_stmt(self, statement: stmt.Block) -> None:
+        self.execute_block(statement.statements, Environment(self.env))
+
     # I dont think this is necessary in python, this evaluate step is probably
     # a java only thing
     def visit_expression_stmt(self, statement: stmt.Expression) -> None:

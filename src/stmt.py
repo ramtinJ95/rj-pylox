@@ -9,6 +9,10 @@ V = TypeVar("V")
 
 class Visitor(ABC, Generic[V]):
     @abstractmethod
+    def visit_block_stmt(self, stmt: "Block") -> V:
+        ...
+
+    @abstractmethod
     def visit_expression_stmt(self, stmt: "Expression") -> V:
         ...
 
@@ -25,6 +29,14 @@ class Stmt(ABC):
     @abstractmethod
     def accept(self, visitor: Visitor[V]) -> V:
         ...
+
+
+class Block(Stmt):
+    def __init__(self, statements: list[Stmt]):
+        self.statements: list[Stmt] = statements
+
+    def accept(self, visitor: Visitor):
+        return visitor.visit_block_stmt(self)
 
 
 class Expression(Stmt):
