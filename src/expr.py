@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-from tokens import Token
+from token import Token
 
 V = TypeVar("V")
 
@@ -13,6 +13,10 @@ class Visitor(ABC, Generic[V]):
 
     @abstractmethod
     def visit_binary_expression(self, expression: "Binary") -> V:
+        ...
+
+    @abstractmethod
+    def visit_call_expression(self, expression: "Call") -> V:
         ...
 
     @abstractmethod
@@ -59,6 +63,16 @@ class Binary(Expr):
 
     def accept(self, visitor: Visitor):
         return visitor.visit_binary_expression(self)
+
+
+class Call(Expr):
+    def __init__(self, callee: Expr, paren: Token, args: list[Expr]):
+        self.callee: Expr = callee
+        self.paren: Token = paren
+        self.args: list[Expr] = args
+
+    def accept(self, visitor: Visitor):
+        return visitor.visit_call_expression(self)
 
 
 class Grouping(Expr):

@@ -18,6 +18,7 @@ def main():
         [
             "Assign | name: Token, value: Expr",
             "Binary | left: Expr, operator: Token, right: Expr",
+            "Call | callee: Expr, paren: Token, args: list[Expr]",
             "Grouping | expression: Expr",
             "Literal | value",
             "Logical | left: Expr, operator: Token, right: Expr",
