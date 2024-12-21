@@ -94,6 +94,15 @@ class Interpreter(expr.Visitor, stmt.Visitor):
 
         return None
 
+    def visit_call_expression(self, expression: expr.Call) -> object:
+        callee = self.evaluate(expr.callee)
+        arguments = [self.evaluate(arg) for arg in expression.args]
+        if len(arguments) != callee.arity():
+            raise RuntimeErr(
+                    f"Expected {callee.arity()} arguments got {len(arguments)}.",
+                    token=expression.paren
+                    )
+
     def evaluate(self, expression: expr.Expr) -> object:
         return expression.accept(self)
 
