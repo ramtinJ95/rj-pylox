@@ -26,6 +26,8 @@ class Parser:
 
     def declaration(self) -> stmt.Stmt:
         try:
+            if self.match(TokenType.FUN):
+                return self.function("function")
             if self.match(TokenType.VAR):
                 return self.var_declaration()
             return self.statement()
@@ -124,6 +126,29 @@ class Parser:
         expression = self.expression()
         self.consume(TokenType.SEMICOLON, "Expect ';' after expression")
         return stmt.Expression(expression)
+
+    def function(self, kind: str) -> stmt.Function:
+        name = self.consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
+        self.consume(TokenType.LEFT_PAREN, f"Expect '(' after {kind} name.")
+
+        params = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            params.append(self.consume(
+                TokenType.IDENTIFIER, "Expect parameter name."))
+            while self.match(TokenType.COMMA):
+                params.append(self.consume(
+                    TokenType.IDENTIFIER, "Expect parameter name."))
+
+        self.consume(TokenType.RIGHT_PAREN,
+                     "Expect ')' before " + kind + " body")
+
+        if len(params) >= 255:
+            self.error(self.peek(), "Cant have more than 255 parameters")
+
+        self.consume(TokenType.LEFT_BRACE,
+                     "Expect '{'before " + kind + " body")
+        body = self.block()
+        return stmt.Function(name, params, body)
 
     def block(self) -> list[stmt.Stmt]:
         statements = []
@@ -224,7 +249,8 @@ class Parser:
             while self.match(TokenType.COMMA):
                 arguments.append(self.expression())
 
-        paren = self.consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
+        paren = self.consume(TokenType.RIGHT_PAREN,
+                             "Expect ')' after arguments.")
         if len(arguments) >= 255:
             self.error(self.peek(), "cant have more than 255 arguments")
 

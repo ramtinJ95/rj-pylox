@@ -17,6 +17,10 @@ class Visitor(ABC, Generic[V]):
         ...
 
     @abstractmethod
+    def visit_function_stmt(self, stmt: "Function") -> V:
+        ...
+
+    @abstractmethod
     def visit_if_stmt(self, stmt: "If") -> V:
         ...
 
@@ -53,6 +57,16 @@ class Expression(Stmt):
 
     def accept(self, visitor: Visitor):
         return visitor.visit_expression_stmt(self)
+
+
+class Function(Stmt):
+    def __init__(self, name: Token, params: list[Token], body: list[Stmt]):
+        self.name: Token = name
+        self.params: list[Token] = params
+        self.body: list[Stmt] = body
+
+    def accept(self, visitor: Visitor):
+        return visitor.visit_function_stmt(self)
 
 
 class If(Stmt):

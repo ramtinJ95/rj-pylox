@@ -1,6 +1,8 @@
 import expr
 import stmt
+import time
 from token_type import TokenType
+from lox_callable import LoxCallable
 from error_handler import ErrorHandler, RuntimeErr
 from tokens import Token
 from environment import Environment
@@ -8,10 +10,25 @@ from environment import Environment
 # TODO: change all these return and parameter types that are object to a
 # smaller subset like int | float etc
 
+# TODO: Remove this clock class and build proper STD for Lox
+
+
+class Clock(LoxCallable):
+    def arity(self) -> int:
+        return 0
+
+    def call(self, interpreter: "Interpreter", args: list) -> float:
+        return time.time()
+
+    def __str__(self) -> str:
+        return "<native clock function>"
+
 
 class Interpreter(expr.Visitor, stmt.Visitor):
+    global_env = Environment()
+
     def __init__(self):
-        self.env = Environment()
+        self.env = self.global_env
 
     def interpret(self, statements: list[stmt.Stmt]) -> None:
         try:
@@ -99,9 +116,9 @@ class Interpreter(expr.Visitor, stmt.Visitor):
         arguments = [self.evaluate(arg) for arg in expression.args]
         if len(arguments) != callee.arity():
             raise RuntimeErr(
-                    f"Expected {callee.arity()} arguments got {len(arguments)}.",
-                    token=expression.paren
-                    )
+                f"Expected {callee.arity()} arguments got {len(arguments)}.",
+                token=expression.paren
+            )
 
     def evaluate(self, expression: expr.Expr) -> object:
         return expression.accept(self)
