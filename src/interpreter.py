@@ -3,7 +3,8 @@ import stmt
 import time
 from token_type import TokenType
 from lox_callable import LoxCallable
-from error_handler import ErrorHandler, RuntimeErr
+from lox_function import LoxFunction
+from error_handler import ErrorHandler, RuntimeErr, Return
 from tokens import Token
 from environment import Environment
 
@@ -144,6 +145,11 @@ class Interpreter(expr.Visitor, stmt.Visitor):
         self.evaluate(statement.expression)
         return None
 
+    def visit_function_stmt(self, statement: stmt.Function) -> None:
+        function = LoxFunction(statement, self.env)
+        self.env.define(statement.name.lexeme, function)
+        return None
+
     def visit_if_stmt(self, statement: stmt.If) -> None:
         if self.is_truthy(self.evaluate(statement.condition)):
             self.execute(statement.then_branch)
@@ -157,6 +163,12 @@ class Interpreter(expr.Visitor, stmt.Visitor):
         value = self.evaluate(statement.expression)
         print(self.stringify(value))
         return None
+
+    def visit_return_stmt(self, statement: stmt.Return) -> None:
+        value = None
+        if statement.value is not None:
+            value = self.evaluate(statement.value)
+        raise Return(value)
 
     def visit_var_stmt(self, statement: stmt.Var) -> None:
         value = None

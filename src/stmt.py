@@ -29,6 +29,10 @@ class Visitor(ABC, Generic[V]):
         ...
 
     @abstractmethod
+    def visit_return_stmt(self, stmt: "Return") -> V:
+        ...
+
+    @abstractmethod
     def visit_var_stmt(self, stmt: "Var") -> V:
         ...
 
@@ -87,6 +91,15 @@ class Print(Stmt):
 
     def accept(self, visitor: Visitor):
         return visitor.visit_print_stmt(self)
+
+
+class Return(Stmt):
+    def __init__(self, keyword: Token, value: Expr | None):
+        self.keyword: Token = keyword
+        self.value: Expr | None = value
+
+    def accept(self, visitor: Visitor):
+        return visitor.visit_return_stmt(self)
 
 
 class Var(Stmt):

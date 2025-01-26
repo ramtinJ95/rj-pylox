@@ -8,6 +8,11 @@ class ParseError(RuntimeError):
     pass
 
 
+class Return(RuntimeError):
+    def __init__(self, value) -> None:
+        self.value = value
+
+
 class RuntimeErr(RuntimeError):
     def __init__(self, *args: object, token: Token) -> None:
         super().__init__(*args)
