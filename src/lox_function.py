@@ -43,7 +43,7 @@ class LoxFunction(LoxCallable):
         except Return as e:
             if self.is_init:
                 return self.closure.get_at(0, "this")
-            return e.val
+            return e.value
 
         if self.is_init:
             return self.closure.get_at(0, "this")
