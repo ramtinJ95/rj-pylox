@@ -4,6 +4,7 @@ from parser import Parser
 from error_handler import ErrorHandler
 from scanner import Scanner
 from interpreter import Interpreter
+from resolver import Resolver
 
 
 class Lox:
@@ -35,6 +36,9 @@ class Lox:
         # print(f"this is what comes out the parser: {expression}")
         if ErrorHandler.has_error:
             sys.exit(65)
+
+        resolver = Resolver(interpreter)
+        resolver.resolve_stmts(statements)
         if ErrorHandler.had_runtime_error:
             sys.exit(70)
         # self.interpreter.interpret(expression)

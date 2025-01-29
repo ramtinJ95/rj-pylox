@@ -30,6 +30,7 @@ class Interpreter(expr.Visitor, stmt.Visitor):
 
     def __init__(self):
         self.env = self.global_env
+        self.locals: dict[expr.Expr, int] = {}
 
     def interpret(self, statements: list[stmt.Stmt]) -> None:
         try:
@@ -37,6 +38,9 @@ class Interpreter(expr.Visitor, stmt.Visitor):
                 self.execute(statement)
         except RuntimeErr as error:
             ErrorHandler.runtime_error(error)
+
+    def resolve(self, expr: expr.Expr, depth: int):
+        self.locals[expr] = depth
 
     def visit_literal_expression(self, expression: expr.Literal) -> object:
         return expression.value
@@ -68,7 +72,14 @@ class Interpreter(expr.Visitor, stmt.Visitor):
         return None
 
     def visit_variable_expression(self, expression: expr.Variable) -> object:
-        return self.env.get(expression.name)
+        return self.lookup_variable(expression.name, expression)
+
+    def lookup_variable(self, name, expression: expr.Expr) -> object:
+        distance = self.locals.get(expression)
+        if distance is not None:
+            return self.env.get_at(distance, name.lexeme)
+        else:
+            return self.global_env.get(name)
 
     def visit_binary_expression(self, expression: expr.Binary) -> object:
         left = self.evaluate(expression.left)
@@ -189,7 +200,12 @@ class Interpreter(expr.Visitor, stmt.Visitor):
 
     def visit_assign_expression(self, expression: expr.Assign) -> object:
         value = self.evaluate(expression.value)
-        self.env.assign(expression.name, value)
+        distance = self.locals.get(expression)
+        if distance is not None:
+            self.env.assign_at(distance, expression.name, value)
+        else:
+            self.global_env.assign(expression.name, value)
+
         return value
 
     def is_truthy(self, obj: object) -> bool:
