@@ -1,23 +1,19 @@
-[tool.poetry]
+[project]
 name = "rj-pylox"
 version = "0.0.1"
 description = "Project for learning how to create a programing language"
-authors = ["ramtinJ95 <ramme95@gmail.com>"]
-maintainers = ["Ramtin"]
+authors = [{ name = "ramtinJ95", email = "ramme95@gmail.com" }]
+maintainers = [{ name = "Ramtin" }]
 readme = "README.md"
-package-mode = false
+requires-python = ">=3.11,<3.12"
 
-[tool.poetry.dependencies]
-python = "3.11.*"
-ruff = "^0.6.1"
-mypy = "^1.11.1"
+[project.optional-dependencies]
+dev = ["ruff>=0.6.1", "mypy>=1.11.1"]
 
 [tool.ruff]
 indent-width = 4
 line-length = 100
 show-fixes = true
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
+[dependency-groups]
+dev = ["mypy>=1.17.1", "ruff>=0.12.10"]
